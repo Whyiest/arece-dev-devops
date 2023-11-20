@@ -55,16 +55,16 @@ fi
 DOCKER_COMPOSE_FILE="$LAUNCHER_PATH/docker-compose.yml"
 DOCKER_FILE="$LAUNCHER_PATH/Dockerfile"
 
+
+# Information utilisateur - Début de test -----------------
+echo ""
+echo -e "${NC}[${GREEN}⧁${NC}] ${BLUE}Démarrage vérification..."
+echo ""
+
 # Remplacement du nom d'utilisateur dans le fichier docker-compose.yml
 sed -i "s#/home/CHANGEHERE/ros2_ws#/home/$USERNAME/ros2_ws#g" "$DOCKER_COMPOSE_FILE"
 
-# Information utilisateur - Début de test
-echo ""
-echo -e "${NC}[${GREEN}✔${NC}] Les chemins ont été mis à jour avec votre nom d'utilisateur : $USERNAME"
-echo -e "${NC}[${GREEN}✔${NC}] Docker Compose : $DOCKER_COMPOSE_FILE"
-echo ""
-echo -e "${NC}[${GREEN}⧁${NC}] Démarrage vérification..."
-echo ""
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}User : $USERNAME"
 
 # Vérification de l'existence du fichier docker-compose.yml
 if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
@@ -73,12 +73,16 @@ if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
     exit 1
 fi
 
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Docker Compose path :${NC} $DOCKER_COMPOSE_FILE"
+
 # Vérification de l'existence du fichier Dockerfile
 if [ ! -f "$DOCKER_FILE" ]; then
     echo -e "${NC}[${RED}⨯${NC}] Erreur : le fichier $DOCKER_FILE n'existe pas.${NC}"
     echo ""
     exit 1
 fi
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Docker File path :${NC} $DOCKER_FILE"
+
 
 # Vérification de l'existence du volume sur l'host
 if [ ! -d "$HOST_VOLUME_PATH" ]; then
@@ -86,24 +90,29 @@ if [ ! -d "$HOST_VOLUME_PATH" ]; then
     echo ""
     exit 1
 fi
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Host volume path :${NC} $HOST_VOLUME_PATH"
 
-# Information utilisateur - Fin de test
-echo -e "${NC}[${GREEN}✔${NC}] Vérification terminée."
+
+# Information utilisateur - Fin de test ---------------------
 echo ""
-echo -e "${NC}[${YELLOW}⧁${NC}] Prêt au lancement, début dans 3s."
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Vérification terminée."
+echo ""
+echo -e "${NC}[${YELLOW}⧁${NC}] ${GREEN}Prêt au lancement, début dans ${NC}3s."
 echo ""
 sleep 3
 
+
+
 # Lancement du container avec docker-compose
-echo -e "${NC}[${BLUE}⧁${NC}] Construction du container Docker... ${NC}"
+echo -e "${NC}[${BLUE}⧁${NC}] ${BLUE}Construction du container Docker... ${NC}"
 cd "$LAUNCHER_PATH"
 docker-compose build || { echo -e "${NC}[${RED}⨯${NC}] Erreur lors de la construction du container Docker.${NC}"; exit 1; }
 
 # Lancement du container avec docker-compose
 echo ""
-echo -e "${NC}[${BLUE}⧁${NC}] Lancement du container Docker... ${NC}"
+echo -e "${NC}[${BLUE}⧁${NC}] ${BLUE}Lancement du container Docker... ${NC}"
 docker-compose up -d || { echo -e "${NC}[${RED}⨯${NC}] Erreur lors du démarrage du container Docker.${NC}"; exit 1; }
 
 # Fin programme
 echo ""
-echo -e "${NC}[${GREEN}✔${NC}] Container Docker lancé ! ${NC}"
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Container Docker lancé avec succès ! ${NC}"
