@@ -58,20 +58,19 @@ RUN sudo apt-get install -y \
     python3-yaml \
     libyaml-cpp-dev
 
-
-
-RUN sudo /bin/bash -c '. /opt/ros/humble/setup.bash; colcon build'
-
-# Configuration de l'environnement à chaque exécution d'un terminal bash
-RUN sudo echo "source /opt/ros/humble/setup.bash" | sudo tee -a /home/arece/.bashrc
-RUN sudo echo "source /home/arece/gazebo_ws/install/setup.bash" >> /home/arece/.bashrc
-RUN sudo echo "source /home/arece/ros2_ws/install/setup.bash" >> /home/arece/.bashrc
-RUN sudo echo "export ARECE_MASTER=~/ros2_ws/src" >> /home/arece/.bashrc
-
 # Configuration de l'espace de travail pour Gazebo
 WORKDIR /home/arece/gazebo_ws
 
 
 # Configuration de l'espace de travail pour ROS
 WORKDIR /home/arece/ros2_ws
+
+
+RUN sudo /bin/bash -c '. /opt/ros/humble/setup.bash; colcon build'
+
+# Configuration de l'environnement à chaque exécution d'un terminal bash
+RUN sudo echo "source /opt/ros/humble/setup.bash" | sudo tee -a /home/arece/.bashrc
+RUN sudo echo "source /home/arece/ros2_ws/install/setup.bash" >> /home/arece/.bashrc
+RUN sudo echo "export ARECE_MASTER=~/ros2_ws/src" >> /home/arece/.bashrc
+
 

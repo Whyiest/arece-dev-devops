@@ -26,11 +26,15 @@ echo -e "   ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝ ╚
 echo -e "${NC}"
 echo ""
 
+# Information programme
+echo -e "${GREEN}Si vous avez déjà lancé et créé une instance Docker avec cet outil, supprimez-la avec docker kill [instance] et effacez les fichiers liés."
+echo ""
+
 # Affichage du nom d'utilisateur
 echo -e "${BLUE} Utilisateur actuel : ${NC} $USERNAME"
 
 # Demande à l'utilisateur de choisir entre Mac et Windows
-echo -e "${BLUE} Choisissez votre système d'exploitation (mac/windows) : ${NC}"
+echo -e "${BLUE} Choisissez votre système d'exploitation (${NC}mac/windows${BLUE}) : ${NC}"
 read OS_CHOICE
 
 # Formation du path 
@@ -43,7 +47,7 @@ elif [ "$OS_CHOICE" = "windows" ]; then
     LAUNCHER_PATH="$WINDOWS_FOLDER_PATH"
 
 else
-    echo -e "${NC}[${RED}⨯${NC} Erreur : choix invalide, votre os n'est pas pris en charge. Veuillez choisir 'mac' ou 'windows'. ${NC}"
+    echo -e "${NC}[${RED}⨯${NC}] Erreur : choix invalide, votre os n'est pas pris en charge. Veuillez choisir 'mac' ou 'windows'. ${NC}"
     echo ""
     exit 1
 fi
@@ -84,14 +88,22 @@ if [ ! -d "$HOST_VOLUME_PATH" ]; then
 fi
 
 # Information utilisateur - Fin de test
-echo -e "${NC}[${GREEN}✔${NC}] Vérification terminée, prêt au lancement."
+echo -e "${NC}[${GREEN}✔${NC}] Vérification terminée."
 echo ""
+echo -e "${NC}[${YELLOW}⧁${NC}] Prêt au lancement, début dans 3s."
+echo ""
+sleep 3
 
 # Lancement du container avec docker-compose
-echo -e "${NC}[${BLUE}⧁${NC}] Lancement du container Docker... ${NC}"
+echo -e "${NC}[${BLUE}⧁${NC}] Construction du container Docker... ${NC}"
 cd "$LAUNCHER_PATH"
-docker-compose up -d
+docker-compose build || { echo -e "${NC}[${RED}⨯${NC}] Erreur lors de la construction du container Docker.${NC}"; exit 1; }
+
+# Lancement du container avec docker-compose
+echo ""
+echo -e "${NC}[${BLUE}⧁${NC}] Lancement du container Docker... ${NC}"
+docker-compose up -d || { echo -e "${NC}[${RED}⨯${NC}] Erreur lors du démarrage du container Docker.${NC}"; exit 1; }
 
 # Fin programme
 echo ""
-echo -e "${NC}[${GREEN}✔${NC}] Container Docker lancé.${NC}"
+echo -e "${NC}[${GREEN}✔${NC}] Container Docker lancé ! ${NC}"
