@@ -7,10 +7,7 @@ services:
       - DISPLAY=${DISPLAY}
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - /home/arthur/ros2_ws:/home/arthur/ros2_ws
+      - /home/arece/ros2_ws:/home/arece/ros2_ws
     stdin_open: true 
     tty: true
-    devices:
-      - "/dev/dri/card0:/dev/dri/card0"
-      - "/dev/dri/card1:/dev/dri/card1"
-      - "/dev/dri/renderD128:/dev/dri/renderD128"
+
