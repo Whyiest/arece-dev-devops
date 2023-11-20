@@ -1,14 +1,17 @@
 #!/bin/bash
 
-# Définition du temps d'affichage des informations : 
+# Définition du temps d'affichage des informations :
 SHOW_INFO_DELAY=5
 
 # Stockage du nom d'utilisateur dans une variable
 USERNAME=$(whoami)
 
+# Déclaration de la variable GPU
+GPU="UNKNOWN"
+
 # Default Path
-MAC_FOLDER_PATH='./MacLauncher'
-WINDOWS_FOLDER_PATH='./WindowsLauncher'
+MAC_FOLDER_PATH='./ARMLauncher'
+WINDOWS_FOLDER_PATH='./x86Launcher'
 HOST_VOLUME_PATH="/home/$USERNAME/ros2_ws"
 
 # Couleurs
@@ -34,21 +37,47 @@ echo -e "${GREEN}Si vous avez déjà lancé et créé une instance Docker avec c
 echo ""
 
 # Affichage du nom d'utilisateur
-echo -e "${BLUE} Utilisateur actuel : ${NC} $USERNAME"
+echo -e "${BLUE}Utilisateur actuel : ${NC} $USERNAME"
+
+# Demande à l'utilisateur de son consentemment d'installation
+echo -e "${BLUE}Voulez-vous lancer l'installation de l'environnement ARECE ? (${NC}y/n${BLUE}) : ${NC}"
+read INSTALL_CHOICE
+
+if [ "$INSTALL_CHOICE" = "y" ]; then
+    echo ""
+    elif [ "$INSTALL_CHOICE" = "n" ]; then
+    echo -e "${NC}[${RED}⨯${NC}] ${RED}Annulation de l'installation.${NC}"
+    exit 1
+else
+    echo -e "${NC}[${RED}⨯${NC}] ${RED}Choix non reconnu, annulation.${NC}"
+    exit 1
+fi
+
 
 # Demande à l'utilisateur de choisir entre Mac et Windows
-echo -e "${BLUE} Choisissez votre système d'exploitation (${NC}mac/windows${BLUE}) : ${NC}"
+echo -e "${BLUE}Choisissez votre système d'exploitation (${NC}mac/windows/linux${BLUE}) : ${NC}"
 read OS_CHOICE
 
-# Formation du path 
+
+# Information utilisateur - Début de test /////////////////////////////////
+echo ""
+echo -e "${NC}[${GREEN}⧁${NC}] ${BLUE}Démarrage vérification..."
+echo ""
+
+
+
+# Définition des paths
 
 LAUNCHER_PATH=""
 
+#
 if [ "$OS_CHOICE" = "mac" ]; then
+    # ARM ONLY
     LAUNCHER_PATH="$MAC_FOLDER_PATH"
-elif [ "$OS_CHOICE" = "windows" ]; then
+    elif [ "$OS_CHOICE" = "windows" ] || [ "$OS_CHOICE" = "linux" ]; then
+    #X86 ONLY
     LAUNCHER_PATH="$WINDOWS_FOLDER_PATH"
-
+    
 else
     echo -e "${NC}[${RED}⨯${NC}] Erreur : choix invalide, votre os n'est pas pris en charge. Veuillez choisir 'mac' ou 'windows'. ${NC}"
     echo ""
@@ -58,15 +87,7 @@ fi
 DOCKER_COMPOSE_FILE="$LAUNCHER_PATH/docker-compose.yml"
 DOCKER_FILE="$LAUNCHER_PATH/Dockerfile"
 
-# Information utilisateur - Début de test -----------------
-echo ""
-echo -e "${NC}[${GREEN}⧁${NC}] ${BLUE}Démarrage vérification..."
-echo ""
 
-# Remplacement du nom d'utilisateur dans le fichier docker-compose.yml
-sed -i "s#/home/CHANGEHERE/ros2_ws#/home/$USERNAME/ros2_ws#g" "$DOCKER_COMPOSE_FILE"
-
-echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}User : $USERNAME"
 
 # Vérification de l'existence du fichier docker-compose.yml
 if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
@@ -77,6 +98,9 @@ fi
 
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Docker Compose path :${NC} $DOCKER_COMPOSE_FILE"
 
+
+
+
 # Vérification de l'existence du fichier Dockerfile
 if [ ! -f "$DOCKER_FILE" ]; then
     echo -e "${NC}[${RED}⨯${NC}] Erreur : le fichier $DOCKER_FILE n'existe pas.${NC}"
@@ -84,6 +108,8 @@ if [ ! -f "$DOCKER_FILE" ]; then
     exit 1
 fi
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Docker File path :${NC} $DOCKER_FILE"
+
+
 
 
 # Vérification de l'existence du volume sur l'host
@@ -95,17 +121,87 @@ fi
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Host volume path :${NC} $HOST_VOLUME_PATH"
 
 
-# Détecter la présence d'une carte graphique NVIDIA ou AMD
-# TO DO : La commande ne marche PAS sur Windows, il faut créer un script python pour automatiser la détéction d'OS et de carte graphique
-nvidia_card=$(lspci | grep -i 'nvidia')
-amd_card=$(lspci | grep -i 'amd\|radeon')
-intel_card=$(lspci | grep -i 'intel')
-
-# Fonction pour ajouter des périphériques GPU à docker-compose.yml
 
 
+# Remplacement du nom d'utilisateur dans le fichier docker-compose.yml
+sed -i "s#/home/CHANGEHERE/ros2_ws#/home/$USERNAME/ros2_ws#g" "$DOCKER_COMPOSE_FILE"
 
-# Information utilisateur - Fin de test ---------------------
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Updated user: ${NC}$USERNAME"
+
+
+
+
+# Détecter la présence d'une carte graphique NVIDIA, INTEL ou AMD
+echo -e "${NC}[${GREEN}?${NC}] ${GREEN}Souhaitez-vous auto-détecter la carte graphique ou la saisir manuellement ? (${NC}auto/manuel${GREEN}) : ${NC}"
+read GPU_CHOICE
+
+
+if [ "$GPU_CHOICE" = "auto" ]; then
+    
+    # Auto-détection du GPU
+    if [ "$OS_CHOICE" = "linux" ]; then
+        if [ "$(lspci | grep -i nvidia)" ]; then
+            GPU="NVIDIA"
+            elif [ "$(lspci | grep -i amd)" ]; then
+            GPU="AMD"
+            elif [ "$(lspci | grep -i intel)" ]; then
+            GPU="INTEL"
+        else
+            GPU="UNKNOWN"
+        fi
+        elif [ "$OS_CHOICE" = "mac" ]; then
+        if system_profiler SPDisplaysDataType | grep -i nvidia > /dev/null; then
+            GPU="NVIDIA"
+            elif system_profiler SPDisplaysDataType | grep -i amd > /dev/null; then
+            GPU="AMD"
+            elif system_profiler SPDisplaysDataType | grep -i intel > /dev/null; then
+            GPU="INTEL"
+        else
+            GPU="UNKNOWN"
+        fi
+        elif [ "$OS_CHOICE" = "windows" ]; then
+            echo -e "${NC}[${RED}⨯${NC}] Erreur : détection automatique impossible sous Windows. Merci d'essayer en manuel. ${NC}"
+            exit 1
+    fi
+    elif [ "$GPU_CHOICE" = "manuel" ]; then
+    
+    
+    # Saisie manuelle du GPU
+    echo -e "${NC}[${GREEN}?${NC}] ${GREEN}Veuillez saisir le type de votre GPU (NVIDIA/AMD/INTEL) : ${NC}"
+    read GPU_MANUAL
+    GPU=$(echo "$GPU_MANUAL" | tr '[:lower:]' '[:upper:]') # Convertit en majuscules
+else
+    echo -e "${NC}[${RED}⨯${NC}] Erreur : choix invalide. Veuillez choisir 'auto' ou 'manuelle'. ${NC}"
+    exit 1
+fi
+
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}GPU détecté/saisi: ${NC}${GPU}"
+
+
+# Configuration selon le GPU
+
+case "$GPU" in
+    NVIDIA)
+        # Configuration spécifique pour NVIDIA
+        ;;
+    AMD)
+        # Configuration spécifique pour AMD
+        ;;
+    INTEL)
+        # Configuration spécifique pour INTEL
+        ;;
+    *)
+        echo -e "${NC}[${RED}⨯${NC}] ${RED}Erreur : Type de GPU non reconnu. L'application nécessite un GPU NVIDIA, AMD ou INTEL.${NC}"
+        exit 1
+        ;;
+esac
+
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Configuration GPU : ${NC}OK"
+
+
+
+
+# Information utilisateur - FIN DE TEST /////////////////////////////////
 echo ""
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Vérification terminée."
 echo ""
