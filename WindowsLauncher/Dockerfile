@@ -1,16 +1,20 @@
+# Installation de ros :
 FROM ros:humble-ros-core-jammy
 
+# Mise à jour des paquets et installation de sudo
+RUN apt-get update && apt-get install -y sudo
+
 # Ajout de l'utilisateur ARECE et configuration de sudo
-RUN apt-get update && apt-get install -y sudo \
-    && useradd -m ARECE \
-    && echo "ARECE ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/ARECE \
-    && chmod 0440 /etc/sudoers.d/ARECE
+RUN useradd -m arece \
+    && echo "arece ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/arece \
+    && chmod 0440 /etc/sudoers.d/arece
 
 # Changement d'utilisateur à ARECE
-USER ARECE
+USER arece
 
 # Mise à jour et installation des paquets nécessaires
 RUN sudo apt-get update && sudo apt-get install -y \
+    curl \
     git \
     nano \
     software-properties-common \
@@ -18,11 +22,12 @@ RUN sudo apt-get update && sudo apt-get install -y \
     python3-rosdep
 
 # Configuration de ROS
-RUN sudo rosdep init && sudo rosdep update
+RUN sudo rosdep init && rosdep update
 
 # Installation des dépendances pour ROS et Gazebo
 RUN sudo apt-get install -y \
     ros-humble-rviz2 \
+    apt-utils \
     gazebo \
     python3-colcon-common-extensions \
     ros-humble-gazebo-dev \
@@ -54,12 +59,19 @@ RUN sudo apt-get install -y \
     libyaml-cpp-dev
 
 
-# Permet d'exécuter le setup.sh
-RUN sudo /bin/bash -c '. /opt/ros/humble/setup.sh; colcon build'
+
+RUN sudo /bin/bash -c '. /opt/ros/humble/setup.bash; colcon build'
 
 # Configuration de l'environnement à chaque exécution d'un terminal bash
-RUN echo "source /opt/ros/humble/setup.sh" | sudo tee -a /home/ARECE/.bashrc
-RUN echo "source /gazebo_ws/install/setup.sh" | sudo tee -a /home/ARECE/.bashrc
+RUN sudo echo "source /opt/ros/humble/setup.bash" | sudo tee -a /home/arece/.bashrc
+RUN sudo echo "source /home/arece/gazebo_ws/install/setup.bash" >> /home/arece/.bashrc
+RUN sudo echo "source /home/arece/ros2_ws/install/setup.bash" >> /home/arece/.bashrc
+RUN sudo echo "export ARECE_MASTER=~/ros2_ws/src" >> /home/arece/.bashrc
 
-# Configurer le répertoire par défaut du terminal
-WORKDIR /home/ARECE/ros2_ws
+# Configuration de l'espace de travail pour Gazebo
+WORKDIR /home/arece/gazebo_ws
+
+
+# Configuration de l'espace de travail pour ROS
+WORKDIR /home/arece/ros2_ws
+
