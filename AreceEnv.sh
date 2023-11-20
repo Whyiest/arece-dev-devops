@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Définition du temps d'affichage des informations : 
+SHOW_INFO_DELAY=5
+
 # Stockage du nom d'utilisateur dans une variable
 USERNAME=$(whoami)
 
@@ -55,7 +58,6 @@ fi
 DOCKER_COMPOSE_FILE="$LAUNCHER_PATH/docker-compose.yml"
 DOCKER_FILE="$LAUNCHER_PATH/Dockerfile"
 
-
 # Information utilisateur - Début de test -----------------
 echo ""
 echo -e "${NC}[${GREEN}⧁${NC}] ${BLUE}Démarrage vérification..."
@@ -93,13 +95,30 @@ fi
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Host volume path :${NC} $HOST_VOLUME_PATH"
 
 
+# Détecter la présence d'une carte graphique NVIDIA ou AMD
+nvidia_card=$(lspci | grep -i nvidia)
+amd_card=$(lspci | grep -i 'amd\|radeon')
+intel_card=$(lspci | grep -i 'intel')
+
+# Afficher le résultat
+if [ ! -z "$nvidia_card" ]; then
+    echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Carte graphique détectée : ${NC}NVIDIA"
+elif [ ! -z "$amd_card" ]; then
+    echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Carte graphique détectée : ${NC}AMD"
+elif [ ! -z "$intel_card" ]; then
+    echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Carte graphique détectée : ${NC}INTEL"
+else
+    echo "${NC}[${RED}⨯${NC}] Carte graphique non supportée. Actuellement supporté : NVIDIA, AMD et INTEL."
+    exit 1
+fi
+
 # Information utilisateur - Fin de test ---------------------
 echo ""
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Vérification terminée."
 echo ""
-echo -e "${NC}[${YELLOW}⧁${NC}] ${GREEN}Prêt au lancement, début dans ${NC}3s."
+echo -e "${NC}[${YELLOW}⧁${NC}] ${GREEN}Prêt au lancement, début dans ${NC}$SHOW_INFO_DELAY second(s)."
 echo ""
-sleep 3
+sleep $SHOW_INFO_DELAY
 
 
 
