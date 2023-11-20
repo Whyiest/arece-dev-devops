@@ -96,21 +96,14 @@ echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Host volume path :${NC} $HOST_VOLUME_PAT
 
 
 # Détecter la présence d'une carte graphique NVIDIA ou AMD
-nvidia_card=$(lspci | grep -i nvidia)
+# TO DO : La commande ne marche PAS sur Windows, il faut créer un script python pour automatiser la détéction d'OS et de carte graphique
+nvidia_card=$(lspci | grep -i 'nvidia')
 amd_card=$(lspci | grep -i 'amd\|radeon')
 intel_card=$(lspci | grep -i 'intel')
 
-# Afficher le résultat
-if [ ! -z "$nvidia_card" ]; then
-    echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Carte graphique détectée : ${NC}NVIDIA"
-elif [ ! -z "$amd_card" ]; then
-    echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Carte graphique détectée : ${NC}AMD"
-elif [ ! -z "$intel_card" ]; then
-    echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Carte graphique détectée : ${NC}INTEL"
-else
-    echo "${NC}[${RED}⨯${NC}] Carte graphique non supportée. Actuellement supporté : NVIDIA, AMD et INTEL."
-    exit 1
-fi
+# Fonction pour ajouter des périphériques GPU à docker-compose.yml
+
+
 
 # Information utilisateur - Fin de test ---------------------
 echo ""
