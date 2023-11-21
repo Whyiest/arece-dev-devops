@@ -40,18 +40,15 @@ def parse_graphics_info(graphics_info):
     while i < len(lines):
         line = lines[i]
 
-        if "NVIDIA" in line or "AMD" in line:
+        if "NVIDIA" in line and "Graphics" in line:
+            dedicated_gpu = line
+        elif "AMD" in line and "Graphics" in line:
             dedicated_gpu = line
         elif "Intel" in line and "Graphics" in line:
             integrated_gpu = line
-        elif "AMD" in line and "Graphics" in line:
-            dedicated_gpu = line
         elif "Apple" in line:
-            # Récupérer les trois lignes spécifiques pour la puce Apple M1
             apple_graphics.extend(lines[i:i+3])
-
         i += 1
-
     return dedicated_gpu or integrated_gpu or apple_graphics or "No GPU information found."
 
 if __name__ == "__main__":
