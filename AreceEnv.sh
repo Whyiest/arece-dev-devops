@@ -10,9 +10,9 @@ USERNAME=$(whoami)
 GPU="UNKNOWN"
 
 # Default Path
-ARM_FOLDER_PATH='./ARMLauncher'
-x86_FOLDER_PATH='./x86Launcher'
-HOST_VOLUME_PATH="/home/$USERNAME/ros2_ws"
+MAC_FOLDER_PATH='./MacLauncher'
+WINDOWS_FOLDER_PATH='./WindowsLauncher'
+LINUX_FOLDER_PATH='./LinuxLauncher'
 
 # Couleurs
 RED='\033[0;31m'
@@ -59,160 +59,41 @@ echo -e "${BLUE}Choisissez votre système d'exploitation (${NC}mac/windows/linux
 read OS_CHOICE
 
 
-# Information utilisateur - Début de test /////////////////////////////////
-echo ""
-echo -e "${NC}[${GREEN}⧁${NC}] ${BLUE}Démarrage vérification..."
-echo ""
-
-
-
 # Définition des paths
-
 LAUNCHER_PATH=""
 
-#
+
 if [ "$OS_CHOICE" = "mac" ]; then
     # ARM ONLY
-    LAUNCHER_PATH="$ARM_FOLDER_PATH"
-    elif [ "$OS_CHOICE" = "windows" ] || [ "$OS_CHOICE" = "linux" ]; then
+    LAUNCHER_PATH="$MAC_FOLDER_PATH"
+    elif [ "$OS_CHOICE" = "windows" ]; then
     #X86 ONLY
-    LAUNCHER_PATH="$x86_FOLDER_PATH"
-    
+    LAUNCHER_PATH="$WINDOWS_FOLDER_PATH"
+    elif [ "$OS_CHOICE" = "linux" ]; then
+    #X86 ONLY
+    LAUNCHER_PATH="$LINUX_FOLDER_PATH"
+
 else
     echo -e "${NC}[${RED}⨯${NC}] Erreur : choix invalide, votre os n'est pas pris en charge. Veuillez choisir 'mac' ou 'windows'. ${NC}"
     echo ""
     exit 1
 fi
 
-DOCKER_COMPOSE_FILE="$LAUNCHER_PATH/docker-compose.yml"
-DOCKER_FILE="$LAUNCHER_PATH/Dockerfile"
 
+# Information utilisateur - DEBUT DE TEST
+echo ""
+echo -e "${NC}[${GREEN}⧁${NC}] ${BLUE}Démarrage vérification..."
+echo ""
+cd "$LINUX_FOLDER_PATH"
+./verif.sh || { echo -e "${NC}[${RED}⨯${NC}] Erreur lors de l'exécution du script verif.sh.${NC}"; exit 1; }
 
-
-# Vérification de l'existence du fichier docker-compose.yml
-if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
-    echo -e "${NC}[${RED}⨯${NC}] Erreur : le fichier $DOCKER_COMPOSE_FILE n'existe pas.${NC}"
-    echo ""
-    exit 1
-fi
-
-echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Docker Compose path :${NC} $DOCKER_COMPOSE_FILE"
-
-
-
-
-# Vérification de l'existence du fichier Dockerfile
-if [ ! -f "$DOCKER_FILE" ]; then
-    echo -e "${NC}[${RED}⨯${NC}] Erreur : le fichier $DOCKER_FILE n'existe pas.${NC}"
-    echo ""
-    exit 1
-fi
-echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Docker File path :${NC} $DOCKER_FILE"
-
-
-
-
-# Vérification de l'existence du volume sur l'host
-if [ ! -d "$HOST_VOLUME_PATH" ]; then
-    echo -e "${NC}[${RED}⨯${NC}] Erreur : le dossier $HOST_VOLUME_PATH doit être créé sur l'host pour poursuivre.${NC}"
-    echo ""
-    exit 1
-fi
-echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Host volume path :${NC} $HOST_VOLUME_PATH"
-
-
-
-
-# Remplacement du nom d'utilisateur dans le fichier docker-compose.yml
-sed -i "s#/home/CHANGEHERE/ros2_ws#/home/$USERNAME/ros2_ws#g" "$DOCKER_COMPOSE_FILE"
-
-echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Updated user: ${NC}$USERNAME"
-
-
-
-
-# Détecter la présence d'une carte graphique NVIDIA, INTEL ou AMD
-echo -e "${NC}[${GREEN}?${NC}] ${GREEN}Souhaitez-vous auto-détecter la carte graphique ou la saisir manuellement ? (${NC}auto/manuel${GREEN}) : ${NC}"
-read GPU_CHOICE
-
-
-if [ "$GPU_CHOICE" = "auto" ]; then
-    
-    # Auto-détection du GPU
-    if [ "$OS_CHOICE" = "linux" ]; then
-
-        if [ "$(lspci | grep -i nvidia)" ]; then
-            GPU="NVIDIA"
-            elif [ "$(lspci | grep -i amd)" ]; then
-            GPU="AMD"
-            elif [ "$(lspci | grep -i intel)" ]; then
-            GPU="INTEL"
-        else
-            GPU="UNKNOWN"
-        fi
-
-        elif [ "$OS_CHOICE" = "mac" ]; then
-        if system_profiler SPDisplaysDataType | grep -i nvidia > /dev/null; then
-            GPU="NVIDIA"
-            elif system_profiler SPDisplaysDataType | grep -i amd > /dev/null; then
-            GPU="AMD"
-            elif system_profiler SPDisplaysDataType | grep -i intel > /dev/null; then
-            GPU="INTEL"
-        else
-            GPU="UNKNOWN"
-        fi
-
-        elif [ "$OS_CHOICE" = "windows" ]; then
-            echo -e "${NC}[${RED}⨯${NC}] Erreur : détection automatique impossible sous Windows. Merci d'essayer en manuel. ${NC}"
-            exit 1
-    fi
-    elif [ "$GPU_CHOICE" = "manuel" ]; then
-    
-    
-    # Saisie manuelle du GPU
-    echo -e "${NC}[${GREEN}?${NC}] ${GREEN}Veuillez saisir le type de votre GPU (NVIDIA/AMD/INTEL) : ${NC}"
-    read GPU_MANUAL
-    GPU=$(echo "$GPU_MANUAL" | tr '[:lower:]' '[:upper:]') # Convertit en majuscules
-else
-    echo -e "${NC}[${RED}⨯${NC}] Erreur : choix invalide. Veuillez choisir 'auto' ou 'manuelle'. ${NC}"
-    exit 1
-fi
-
-echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}GPU détecté/saisi: ${NC}${GPU}"
-
-
-# Configuration selon le GPU
-
-case "$GPU" in
-    NVIDIA)
-        # Modify the docker-compose file for NVIDIA GPU
-        sed -i '/services:/a \ \ \ \ \ \ deploy:\n \ \ \ \ \ \ \ \ resources:\n \ \ \ \ \ \ \ \ \ \ reservations:\n \ \ \ \ \ \ \ \ \ \ \ \ devices:\n \ \ \ \ \ \ \ \ \ \ \ \ - driver: nvidia\n \ \ \ \ \ \ \ \ \ \ \ \ \ \ capabilities: [gpu]' "$DOCKER_COMPOSE_FILE"
-        ;;
-    AMD)
-        # Configuration spécifique pour AMD
-        ;;
-    INTEL)
-        # Configuration spécifique pour INTEL
-        ;;
-    *)
-        echo -e "${NC}[${RED}⨯${NC}] ${RED}Erreur : Type de GPU non reconnu. L'application nécessite un GPU NVIDIA, AMD ou INTEL.${NC}"
-        exit 1
-        ;;
-esac
-
-echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Configuration GPU : ${NC}OK"
-
-
-
-
-# Information utilisateur - FIN DE TEST /////////////////////////////////
+# Information utilisateur - FIN DE TEST 
 echo ""
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Vérification terminée."
 echo ""
 echo -e "${NC}[${YELLOW}⧁${NC}] ${GREEN}Prêt au lancement, début dans ${NC}$SHOW_INFO_DELAY second(s)."
 echo ""
 sleep $SHOW_INFO_DELAY
-
 
 
 # Lancement du container avec docker-compose

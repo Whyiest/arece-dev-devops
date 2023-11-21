@@ -1,0 +1,12 @@
+version: "3"
+services:
+  humble-master:
+    image: humble:latest
+    build: .
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      # TO DO
+    stdin_open: true
+    tty: true
+  
