@@ -5,11 +5,11 @@ DOCKER_COMPOSE_FILE="docker-compose.yml"
 DOCKER_FILE="Dockerfile"
 HOST_VOLUME_PATH="/c/Users/$USERNAME/ros2_ws"
 
+
 # Vérification de l'existence du fichier docker-compose.yml
 if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
     handle_error "Erreur : le fichier $DOCKER_COMPOSE_FILE n'existe pas."
 fi
-
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Docker Compose path :${NC} $DOCKER_COMPOSE_FILE"
 
 # Vérification de l'existence du fichier Dockerfile
@@ -24,9 +24,19 @@ if [ ! -d "$HOST_VOLUME_PATH" ]; then
 fi
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Host volume path :${NC} $HOST_VOLUME_PATH"
 
-# Remplacement du nom d'utilisateur dans le fichier docker-compose.yml
-sed -i "s#/c/Users/$USERNAME/ros2_ws#/home/arece/ros2_ws#g" "$DOCKER_COMPOSE_FILE"
-echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Updated user:${NC} $USERNAME"
 
 # GPU detection 
-GPU="FICHIER DE PAUL"
+GPU="UNKNOWN"
+
+
+# Création du fichier docker-compose.yml :
+#   0 - Fichier python depuis build.sh
+#   1 - Fichier template depuis build.sh
+#   2 - Fichier de sortie depuis build.sh
+#   3 - Nom d'utilisateur 
+#   4 - GPU de l'utilisateur
+python ../Utilities/FileBuilder.py "../Utilities/template.yml" "./$DOCKER_COMPOSE_FILE" "$USERNAME" "$GPU"
+
+if [ $? -ne 0 ]; then
+    handle_error "Erreur lors de la création du fichier docker-compose.yml."
+fi

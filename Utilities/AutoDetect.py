@@ -24,7 +24,7 @@ def get_graphics_card_info():
             return result.stdout.strip()
         else:
             return "Unsupported platform"
-
+    
     except Exception as e:
         return f"Error getting GPU information: {e}"
 
