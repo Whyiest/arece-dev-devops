@@ -4,32 +4,17 @@
 DOCKER_COMPOSE_FILE="docker-compose.yml"
 DOCKER_FILE="Dockerfile"
 HOST_VOLUME_PATH="/Users/$USERNAME/ros2_ws"
+VOLUME_INSTRUCTIONS="/tmp/.X11-unix:/tmp/.X11-unix\n      - $HOST_VOLUME_PATH:/home/arece/ros2_ws"
 
-# Vérification de l'existence du fichier docker-compose.yml
-if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
-    handle_error "Erreur : le fichier $DOCKER_COMPOSE_FILE n'existe pas."
-fi
+# File integrity verification
+file_check
 
-echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Docker Compose path :${NC} $DOCKER_COMPOSE_FILE"
+# GPU detection
+gpu_detect
 
-# Vérification de l'existence du fichier Dockerfile
-if [ ! -f "$DOCKER_FILE" ]; then
-    handle_error "Erreur : le fichier $DOCKER_FILE n'existe pas."
-fi
-echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Docker File path :${NC} $DOCKER_FILE"
+# TO DO : REMOVE THIS :
+GPU="null"
+# TO DO : Définir les instructions GPU en fonction du GPU détecté
+GPU_INSTRUCTIONS="devices:\n      - \"/dev/dri/card0:/dev/dri/card0\"\n      - \"/dev/dri/card1:/dev/dri/card1\"\n      - \"/dev/dri/renderD128:/dev/dri/renderD128\""
 
-# Vérification de l'existence du volume sur l'host
-if [ ! -d "$HOST_VOLUME_PATH" ]; then
-    handle_error "Erreur : le dossier $HOST_VOLUME_PATH doit être créé sur l'host pour poursuivre."
-fi
-echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Host volume path :${NC} $HOST_VOLUME_PATH"
-
-# Remplacement du nom d'utilisateur dans le fichier docker-compose.yml
-sed -i "s#/Users/$USERNAME/ros2_ws#/home/arece/ros2_ws#g" "$DOCKER_COMPOSE_FILE"
-echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Updated user: ${NC}$USERNAME"
-
-# Détection CPU : 
-$GPU="FICHIER DE PAUL"
-
-# Pour macOS, la configuration du GPU peut ne pas être nécessaire car tous les macs ont la même carte.
-# Nous avons donc ajouter le chemin par défaut dans docker-compose.
+create_docker_compose
