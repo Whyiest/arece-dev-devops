@@ -21,6 +21,11 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # Pas de couleur
 
+# EXPORT
+export RED GREEN YELLOW BLUE NC
+export GPU
+export USERNAME
+
 # Affichage de "ARECE" en art ASCII
 echo -e "${BLUE} "
 echo -e "    █████╗ ██████╗ ███████╗ ██████╗ ███████╗"

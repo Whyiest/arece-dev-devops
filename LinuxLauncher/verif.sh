@@ -1,14 +1,9 @@
-# Couleurs
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+#!/bin/bash
 
+# Définition des paths pour Linux :
 DOCKER_COMPOSE_FILE="docker-compose.yml"
 DOCKER_FILE="Dockerfile"
 HOST_VOLUME_PATH="/home/$USERNAME/ros2_ws"
-
 
 # Vérification de l'existence du fichier docker-compose.yml
 if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then

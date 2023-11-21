@@ -6,7 +6,7 @@ services:
     environment:
       - DISPLAY=${DISPLAY}
     volumes:
-      # TO DO
+      - /c/Users/CHANGEHERE/ros2_ws:/home/arece/ros2_ws
     stdin_open: true
     tty: true
   

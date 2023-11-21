@@ -1,15 +1,8 @@
 #!/bin/bash
 
-# Couleurs
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # Pas de couleur
-
+# Définition des paths pour Mac : 
 DOCKER_COMPOSE_FILE="docker-compose.yml"
 DOCKER_FILE="Dockerfile"
-# Adaptation du chemin pour macOS, utilisez le chemin approprié pour votre projet
 HOST_VOLUME_PATH="/Users/$USER/ros2_ws"
 
 # Vérification de l'existence du fichier docker-compose.yml
