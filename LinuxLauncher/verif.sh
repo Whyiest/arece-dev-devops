@@ -34,7 +34,7 @@ echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Host volume path :${NC} $HOST_VOLUME_PAT
 
 
 # Remplacement du nom d'utilisateur dans le fichier docker-compose.yml
-sed -i "s#/home/CHANGEHERE/ros2_ws#/home/$USERNAME/ros2_ws#g" "$DOCKER_COMPOSE_FILE"
+sed -i "s#/home/$USERNAME/ros2_ws#/home/arece/ros2_ws#g" "$DOCKER_COMPOSE_FILE"
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Updated user: ${NC}$USERNAME"
 
 

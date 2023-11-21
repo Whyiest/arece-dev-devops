@@ -3,8 +3,7 @@
 # Définition des paths pour Windows 
 DOCKER_COMPOSE_FILE="docker-compose.yml"
 DOCKER_FILE="Dockerfile"
-HOST_VOLUME_PATH="/c/Users/$USER/ros2_ws"
-
+HOST_VOLUME_PATH="/c/Users/$USERNAME/ros2_ws"
 
 # Vérification de l'existence du fichier docker-compose.yml
 if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
@@ -26,8 +25,8 @@ fi
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Host volume path :${NC} $HOST_VOLUME_PATH"
 
 # Remplacement du nom d'utilisateur dans le fichier docker-compose.yml
-sed -i "s#/c/Users/$USER/ros2_ws#/home/$USER/ros2_ws#g" "$DOCKER_COMPOSE_FILE"
-echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Updated user: ${NC}$USER"
+sed -i "s#/c/Users/$USERNAME/ros2_ws#/home/arece/ros2_ws#g" "$DOCKER_COMPOSE_FILE"
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Updated user:${NC} $USERNAME"
 
 # GPU detection 
 GPU="FICHIER DE PAUL"

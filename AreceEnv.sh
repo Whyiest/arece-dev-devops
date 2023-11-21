@@ -81,10 +81,10 @@ if [ "$OS_CHOICE" = "mac" ]; then
     # ARM ONLY
     LAUNCHER_PATH="$MAC_FOLDER_PATH"
 elif [ "$OS_CHOICE" = "windows" ]; then
-    #X86 ONLY
+    # x86 ONLY
     LAUNCHER_PATH="$WINDOWS_FOLDER_PATH"
 elif [ "$OS_CHOICE" = "linux" ]; then
-    #X86 ONLY
+    # x86 ONLY
     LAUNCHER_PATH="$LINUX_FOLDER_PATH"
 else
     handle_error "Erreur : choix invalide, votre os n'est pas pris en charge."
@@ -94,8 +94,14 @@ fi
 echo ""
 echo -e "${NC}[${GREEN}⧁${NC}] ${BLUE}Démarrage vérification..."
 echo ""
-cd "$LINUX_FOLDER_PATH"
+cd "$LAUNCHER_PATH"
 
+# Vérification intégrité fichier test
+if [ ! -f "verif.sh" ]; then
+    handle_error "Erreur : impossible de trouver le fichier de vérification de l'OS ($LAUNCHER_PATH/verif.sh)."
+fi
+
+# Lancement des tests
 ./verif.sh
 VERIF_EXIT_CODE=$?  # Récupère le code de sortie de verif.sh
 
@@ -114,7 +120,6 @@ sleep $SHOW_INFO_DELAY
 
 # Lancement du container avec docker-compose
 echo -e "${NC}[${BLUE}⧁${NC}] ${BLUE}Construction du container Docker... ${NC}"
-cd "$LAUNCHER_PATH"
 docker-compose build || handle_error "Erreur lors de la construction du container Docker."
 
 # Lancement du container avec docker-compose
