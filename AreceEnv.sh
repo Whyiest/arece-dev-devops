@@ -95,7 +95,14 @@ echo ""
 echo -e "${NC}[${GREEN}⧁${NC}] ${BLUE}Démarrage vérification..."
 echo ""
 cd "$LINUX_FOLDER_PATH"
-./verif.sh 
+
+./verif.sh
+VERIF_EXIT_CODE=$?  # Récupère le code de sortie de verif.sh
+
+# Vérifie si verif.sh s'est terminé avec une erreur
+if [ $VERIF_EXIT_CODE -ne 0 ]; then
+    exit 1  # Arrête AreceEnv.sh si verif.sh a échoué
+fi
 
 # Information utilisateur - FIN DE TEST 
 echo ""
