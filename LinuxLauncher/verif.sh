@@ -7,9 +7,7 @@ HOST_VOLUME_PATH="/home/$USERNAME/ros2_ws"
 
 # Vérification de l'existence du fichier docker-compose.yml
 if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
-    echo -e "${NC}[${RED}⨯${NC}] Erreur : le fichier $DOCKER_COMPOSE_FILE n'existe pas.${NC}"
-    echo ""
-    exit 1
+    handle_error "Erreur : le fichier $DOCKER_COMPOSE_FILE n'existe pas."
 fi
 
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Docker Compose path :${NC} $DOCKER_COMPOSE_FILE"
@@ -19,9 +17,7 @@ echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Docker Compose path :${NC} $DOCKER_COMPO
 
 # Vérification de l'existence du fichier Dockerfile
 if [ ! -f "$DOCKER_FILE" ]; then
-    echo -e "${NC}[${RED}⨯${NC}] Erreur : le fichier $DOCKER_FILE n'existe pas.${NC}"
-    echo ""
-    exit 1
+    handle_error "Erreur : le fichier $DOCKER_FILE n'existe pas."
 fi
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Docker File path :${NC} $DOCKER_FILE"
 
@@ -30,9 +26,7 @@ echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Docker File path :${NC} $DOCKER_FILE"
 
 # Vérification de l'existence du volume sur l'host
 if [ ! -d "$HOST_VOLUME_PATH" ]; then
-    echo -e "${NC}[${RED}⨯${NC}] Erreur : le dossier $HOST_VOLUME_PATH doit être créé sur l'host pour poursuivre.${NC}"
-    echo ""
-    exit 1
+    handle_error "Erreur : le dossier $HOST_VOLUME_PATH doit être créé sur l'host pour poursuivre."
 fi
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Host volume path :${NC} $HOST_VOLUME_PATH"
 
@@ -71,8 +65,7 @@ if [ "$GPU_CHOICE" = "auto" ]; then
     read GPU_MANUAL
     GPU=$(echo "$GPU_MANUAL" | tr '[:lower:]' '[:upper:]') # Convertit en majuscules
 else
-    echo -e "${NC}[${RED}⨯${NC}] Erreur : choix invalide. Veuillez choisir 'auto' ou 'manuelle'. ${NC}"
-    exit 1
+    handle_error "Erreur : choix invalide. Veuillez choisir 'auto' ou 'manuelle'."
 fi
 
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}GPU détecté/saisi: ${NC}${GPU}"
@@ -92,8 +85,7 @@ case "$GPU" in
         # Configuration spécifique pour INTEL
     ;;
     *)
-        echo -e "${NC}[${RED}⨯${NC}] ${RED}Erreur : Type de GPU non reconnu. L'application nécessite un GPU NVIDIA, AMD ou INTEL.${NC}"
-        exit 1
+        handle_error "Erreur : Type de GPU non reconnu. L'application nécessite un GPU NVIDIA, AMD ou INTEL."
     ;;
 esac
 
