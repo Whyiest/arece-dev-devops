@@ -10,8 +10,8 @@ USERNAME=$(whoami)
 GPU="UNKNOWN"
 
 # Default Path
-MAC_FOLDER_PATH='./ARMLauncher'
-WINDOWS_FOLDER_PATH='./x86Launcher'
+ARM_FOLDER_PATH='./ARMLauncher'
+x86_FOLDER_PATH='./x86Launcher'
 HOST_VOLUME_PATH="/home/$USERNAME/ros2_ws"
 
 # Couleurs
@@ -73,10 +73,10 @@ LAUNCHER_PATH=""
 #
 if [ "$OS_CHOICE" = "mac" ]; then
     # ARM ONLY
-    LAUNCHER_PATH="$MAC_FOLDER_PATH"
+    LAUNCHER_PATH="$ARM_FOLDER_PATH"
     elif [ "$OS_CHOICE" = "windows" ] || [ "$OS_CHOICE" = "linux" ]; then
     #X86 ONLY
-    LAUNCHER_PATH="$WINDOWS_FOLDER_PATH"
+    LAUNCHER_PATH="$x86_FOLDER_PATH"
     
 else
     echo -e "${NC}[${RED}⨯${NC}] Erreur : choix invalide, votre os n'est pas pris en charge. Veuillez choisir 'mac' ou 'windows'. ${NC}"
@@ -140,6 +140,7 @@ if [ "$GPU_CHOICE" = "auto" ]; then
     
     # Auto-détection du GPU
     if [ "$OS_CHOICE" = "linux" ]; then
+
         if [ "$(lspci | grep -i nvidia)" ]; then
             GPU="NVIDIA"
             elif [ "$(lspci | grep -i amd)" ]; then
@@ -149,6 +150,7 @@ if [ "$GPU_CHOICE" = "auto" ]; then
         else
             GPU="UNKNOWN"
         fi
+
         elif [ "$OS_CHOICE" = "mac" ]; then
         if system_profiler SPDisplaysDataType | grep -i nvidia > /dev/null; then
             GPU="NVIDIA"
@@ -159,6 +161,7 @@ if [ "$GPU_CHOICE" = "auto" ]; then
         else
             GPU="UNKNOWN"
         fi
+
         elif [ "$OS_CHOICE" = "windows" ]; then
             echo -e "${NC}[${RED}⨯${NC}] Erreur : détection automatique impossible sous Windows. Merci d'essayer en manuel. ${NC}"
             exit 1
@@ -182,7 +185,8 @@ echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}GPU détecté/saisi: ${NC}${GPU}"
 
 case "$GPU" in
     NVIDIA)
-        # Configuration spécifique pour NVIDIA
+        # Modify the docker-compose file for NVIDIA GPU
+        sed -i '/services:/a \ \ \ \ \ \ deploy:\n \ \ \ \ \ \ \ \ resources:\n \ \ \ \ \ \ \ \ \ \ reservations:\n \ \ \ \ \ \ \ \ \ \ \ \ devices:\n \ \ \ \ \ \ \ \ \ \ \ \ - driver: nvidia\n \ \ \ \ \ \ \ \ \ \ \ \ \ \ capabilities: [gpu]' "$DOCKER_COMPOSE_FILE"
         ;;
     AMD)
         # Configuration spécifique pour AMD
