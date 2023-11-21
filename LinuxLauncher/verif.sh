@@ -51,6 +51,9 @@ read GPU_CHOICE
 
 if [ "$GPU_CHOICE" = "auto" ]; then
     
+    # TO DO :
+    # $GPU="FICHIER DE PAUL"
+
     if [ "$(lspci | grep -i nvidia)" ]; then
         GPU="NVIDIA"
         elif [ "$(lspci | grep -i amd)" ]; then

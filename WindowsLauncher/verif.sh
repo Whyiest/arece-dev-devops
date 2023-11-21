@@ -34,4 +34,9 @@ echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Host volume path :${NC} $HOST_VOLUME_PAT
 sed -i "s#/c/Users/$arece/ros2_ws#/home/arece/ros2_ws#g" "$DOCKER_COMPOSE_FILE"
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Updated user: ${NC}$USER"
 
-# GPU detection and configuration steps can be adapted or omitted based on your requirements
+# GPU detection 
+
+$GPU="FICHIER DE PAUL"
+
+
+# GPU Configuration

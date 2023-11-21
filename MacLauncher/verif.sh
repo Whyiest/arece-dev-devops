@@ -34,5 +34,8 @@ echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Host volume path :${NC} $HOST_VOLUME_PAT
 sed -i "s#/Users/CHANGEHERE/ros2_ws#/home/arece/ros2_ws#g" "$DOCKER_COMPOSE_FILE"
 echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Updated user: ${NC}$USER"
 
-# Pour macOS, la détection automatique de GPU peut ne pas être pertinente ou nécessaire
+# Détection CPU : 
+$GPU="FICHIER DE PAUL"
+
+# Pour macOS, la configuration du GPU peut ne pas être nécessaire car tous les macs ont la même carte.
 # Nous avons donc ajouter le chemin par défaut dans docker-compose.
