@@ -39,8 +39,8 @@ gpu_detect() {
     read GPU_CHOICE
     
     if [ "$GPU_CHOICE" = "auto" ]; then
-        # Exemple : auto-détection du GPU et attribution à la variable GPU
-        GPU="FICHIER DE PAUL"
+        # Auto-détection du GPU et attribution à la variable GPU
+        GPU= $(python ../Utilities/AutoDetect.py)
     elif [ "$GPU_CHOICE" = "manuel" ]; then
         # Saisie manuelle du GPU
         echo ""
