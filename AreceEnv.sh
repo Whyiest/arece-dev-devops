@@ -52,8 +52,8 @@ gpu_detect() {
     fi
     
     # Vérification que l'entrée est l'une des options valides (NVIDIA, AMD, INTEL)
-    if [ "$GPU" != "NVIDIA" ] && [ "$GPU" != "AMD" ] && [ "$GPU" != "INTEL" ]; then
-        handle_error "Erreur : choix invalide. Veuillez choisir 'NVIDIA', 'AMD' ou 'INTEL'."
+    if [ "$GPU" != "NVIDIA" ] && [ "$GPU" != "AMD" ] && [ "$GPU" != "INTEL" ] && [ "$GPU" != "APPLE" ]; then
+        handle_error "Erreur : choix invalide. Veuillez choisir 'NVIDIA', 'AMD' ou 'INTEL' ou 'APPLE'."
     fi
 
     echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}GPU détecté/saisi: ${NC}${GPU}"
