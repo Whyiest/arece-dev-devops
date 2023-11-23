@@ -103,24 +103,23 @@ file_check () {
 gpu_create_instructions() {
     case $GPU in
         APPLE)
-            # À remplir avec des instructions spécifiques pour les GPU Apple
-            GPU_INSTRUCTIONS="Instruction_For_Apple_GPU"
+            GPU_INSTRUCTIONS="devices:\n      - /dev/dri:/dev/dri\n    environment:\n      - LIBVA_DRIVER_NAME=iHD"
             ;;
         NVIDIA)
-            # À remplir avec des instructions spécifiques pour les GPU Nvidia
-            GPU_INSTRUCTIONS="Instruction_For_Nvidia_GPU"
+            # Instructions pour les GPU NVIDIA
+            GPU_INSTRUCTIONS="deploy:\n      resources:\n        reservations:\n          devices:\n            - driver: nvidia\n              capabilities: [gpu]"
             ;;
         INTEL)
-            # À remplir avec des instructions spécifiques pour les GPU Intel
-            GPU_INSTRUCTIONS="Instruction_For_Intel_GPU"
+            # Instructions pour les GPU Intel
+            GPU_INSTRUCTIONS="devices:\n      - /dev/dri:/dev/dri\n    environment:\n      - LIBVA_DRIVER_NAME=iHD"
             ;;
         AMD)
-            # À remplir avec des instructions spécifiques pour les GPU AMD
-            GPU_INSTRUCTIONS="Instruction_For_AMD_GPU"
+            # Instructions pour les GPU AMD
+            GPU_INSTRUCTIONS="devices:\n      - /dev/dri:/dev/dri\n    environment:\n      - LIBVA_DRIVER_NAME=radeonsi"
             ;;
         UNKNOWN)
             # Gestion du cas où le GPU n'est pas reconnu
-            handle_error "Erreur : Votre GPU n'est pas compatible. Si vous pensez que c'est un erreur, essayez d'indiquer manuellement votre GPU en relançant le script."
+            handle_error "Erreur : Votre GPU n'est pas compatible. Si vous pensez que c'est une erreur, essayez d'indiquer manuellement votre GPU en relançant le script."
             ;;
         *)
             # Gestion de tout autre cas imprévu
@@ -128,6 +127,7 @@ gpu_create_instructions() {
             ;;
     esac
 }
+
 
 # Exportation 
 export RED GREEN YELLOW BLUE NC
@@ -158,8 +158,8 @@ echo ""
 # Information programme
 echo -e "${GREEN}Si vous avez déjà lancé et créé une instance Docker avec cet outil, supprimez-la avec docker kill [instance] et effacez les fichiers liés."
 echo ""
-echo -e "${NC}[${BLUE}🛈${NC}] ${BLUE}Utilisateur actuel : ${NC} $USERNAME"
-echo -e "${NC}[${BLUE}🛈${NC}] ${BLUE}Dépendences : ${NC} python, docker-compose"
+echo -e "${NC}[${BLUE}🛈${NC}] ${BLUE}Utilisateur actuel : ${NC}$USERNAME"
+echo -e "${NC}[${BLUE}🛈${NC}] ${BLUE}Dépendences : ${NC}python, docker-compose"
 
 # Demande à l'utilisateur de son consentemment d'installation
 echo ""
