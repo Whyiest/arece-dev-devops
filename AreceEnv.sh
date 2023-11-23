@@ -1,5 +1,5 @@
 #!/bin/bash
-
+export MSYS_NO_PATHCONV=1
 
 # Définition du temps d'affichage des informations :
 SHOW_INFO_DELAY=5
@@ -198,7 +198,7 @@ echo -ne "${NC}[${YELLOW}?${NC}] ${BLUE}Quel préfixe utilisez-vous sur votre or
 read PYTHON_PREFIX
 PYTHON=$PYTHON_PREFIX
 echo ""
-echo -e "${NC}[${GREEN}✔${NC}] ${GREEN}Les scripts seront éxecuter avec $PYTHON. En cas de problème de création de fichier ou de détection de GPU, essayez de changer cette variable.${NC}"
+echo -e "${NC}[${GREEN}✔${NC}] ${GREEN}Les scripts seront éxecutés avec $PYTHON. En cas de problème de création de fichier ou de détection de GPU, essayez de changer cette variable.${NC}"
 
 # Information utilisateur - DEBUT CONFIGURATION
 echo ""

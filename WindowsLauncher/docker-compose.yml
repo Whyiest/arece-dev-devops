@@ -6,6 +6,6 @@ services:
     environment:
       - DISPLAY=${DISPLAY}
     volumes:
-      - C:\Users\esteb\ros2_ws;C:\Program Files\Git\home\arece\ros2_ws
+      - /c/Users/esteb/ros2_ws:/home/arece/ros2_ws
     stdin_open: true 
     tty: true
