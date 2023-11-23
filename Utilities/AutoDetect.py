@@ -24,7 +24,7 @@ def get_graphics_card_info():
             return result.stdout.strip()
         else:
             return "Unsupported platform"
-    
+
     except Exception as e:
         return f"Error getting GPU information: {e}"
 
@@ -34,33 +34,29 @@ def parse_graphics_info(graphics_info):
 
     integrated_gpu = None
     dedicated_gpu = None
-    apple_graphics = []
+    apple_graphics = None
 
     i = 0
     while i < len(lines):
         line = lines[i]
 
         if "NVIDIA" in line and "Graphics" in line:
-            dedicated_gpu = line
+            dedicated_gpu = "NVIDIA"
         elif "AMD" in line and "Graphics" in line:
-            dedicated_gpu = line
+            dedicated_gpu = "AMD"
         elif "Intel" in line and "Graphics" in line:
-            integrated_gpu = line
+            integrated_gpu = "INTEL"
         elif "Apple" in line:
-            apple_graphics.extend(lines[i:i+3])
+            apple_graphics = "APPLE"
         i += 1
-    return dedicated_gpu or integrated_gpu or apple_graphics or "No GPU information found."
+    return dedicated_gpu or apple_graphics or integrated_gpu or "No GPU information found."
+
 
 if __name__ == "__main__":
     os_info = get_os_info()
-    print(f"Operating System: {os_info}")
+    # print(f"Operating System: {os_info}")
 
     graphics_card_info = get_graphics_card_info()
-    print("\nGraphics Card Information:")
+    # print("\nGraphics Card Information:")
     parsed_graphics_info = parse_graphics_info(graphics_card_info)
-
-    if isinstance(parsed_graphics_info, list):
-        for line in parsed_graphics_info:
-            print(line)
-    else:
-        print(parsed_graphics_info)
+    print(parsed_graphics_info)
