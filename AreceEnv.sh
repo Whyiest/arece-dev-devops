@@ -197,3 +197,7 @@ docker-compose up -d || handle_error "Erreur lors du lancement du container Dock
 # Fin programme
 echo ""
 echo -e "${NC}[${GREEN}✔${NC}] ${GREEN}Container Docker lancé avec succès ! ${NC}"
+echo ""
+echo -e "${NC}[${GREEN}✔${NC}] ${GREEN}Press any key to exit the program...${NC}"
+read -r
+exit 1

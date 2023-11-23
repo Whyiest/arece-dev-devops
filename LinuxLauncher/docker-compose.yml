@@ -1,13 +1,2 @@
-version: "3"
-services:
-  humble-master:
-    image: humble:latest
-    build: .
-    environment:
-      - DISPLAY=${DISPLAY}
-    volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix
-      - /home/whyiest/ros2_ws:/home/arece/ros2_ws
-    stdin_open: true
-    tty: true
+
   
