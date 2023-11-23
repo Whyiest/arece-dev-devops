@@ -99,6 +99,7 @@ file_check () {
 
 }
 
+
 # Exportation 
 export RED GREEN YELLOW BLUE NC
 export GPU

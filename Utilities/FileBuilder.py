@@ -6,6 +6,8 @@ username = sys.argv[3]
 volume_instruction = sys.argv[4]
 gpu_instruction = sys.argv[5]
 
+print(gpu_instruction)
+
 # Lire le contenu du fichier template
 with open(template_path, 'r') as file:
     content = file.read()
