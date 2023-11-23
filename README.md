@@ -2,7 +2,7 @@
 
 ## À propos d'ARECE
 
-ARECE (Association de Recherche et d'Expérimentation en Conduite Autonome) est une association étudiante pionnière, reconnue comme la première écurie de France dans la catégorie voiture automobile étudiante. Notre objectif est de développer un véhicule autonome innovant capable de participer à des compétitions internationales. Notre passion pour la technologie et l'innovation nous pousse à repousser constamment les limites de ce qui est possible dans le domaine de la conduite autonome.
+ARECE est une association étudiante pionnière, reconnue comme la première écurie de France dans la catégorie voiture automobile étudiante. Notre objectif est de développer un véhicule autonome innovant capable de participer à des compétitions internationales. Notre passion pour la technologie et l'innovation nous pousse à repousser constamment les limites de ce qui est possible dans le domaine de la conduite autonome.
 
 ## Objectif du Projet
 

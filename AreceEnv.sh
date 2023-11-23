@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 # Définition du temps d'affichage des informations :
 SHOW_INFO_DELAY=5
 
@@ -99,6 +100,35 @@ file_check () {
 
 }
 
+gpu_create_instructions() {
+    case $GPU in
+        APPLE)
+            # À remplir avec des instructions spécifiques pour les GPU Apple
+            GPU_INSTRUCTIONS="Instruction_For_Apple_GPU"
+            ;;
+        NVIDIA)
+            # À remplir avec des instructions spécifiques pour les GPU Nvidia
+            GPU_INSTRUCTIONS="Instruction_For_Nvidia_GPU"
+            ;;
+        INTEL)
+            # À remplir avec des instructions spécifiques pour les GPU Intel
+            GPU_INSTRUCTIONS="Instruction_For_Intel_GPU"
+            ;;
+        AMD)
+            # À remplir avec des instructions spécifiques pour les GPU AMD
+            GPU_INSTRUCTIONS="Instruction_For_AMD_GPU"
+            ;;
+        UNKNOWN)
+            # Gestion du cas où le GPU n'est pas reconnu
+            handle_error "Erreur : Votre GPU n'est pas compatible. Si vous pensez que c'est un erreur, essayez d'indiquer manuellement votre GPU en relançant le script."
+            ;;
+        *)
+            # Gestion de tout autre cas imprévu
+            handle_error "Erreur : Type de GPU non reconnu."
+            ;;
+    esac
+}
+
 # Exportation 
 export RED GREEN YELLOW BLUE NC
 export GPU
@@ -108,6 +138,7 @@ export -f handle_error
 export -f gpu_detect
 export -f create_docker_compose
 export -f file_check
+export -f gpu_create_instructions
 
 
 # Affichage de "ARECE" en art ASCII

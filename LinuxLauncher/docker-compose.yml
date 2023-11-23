@@ -6,8 +6,6 @@ services:
     environment:
       - DISPLAY=${DISPLAY}
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix
       - /home/whyiest/ros2_ws:/home/arece/ros2_ws
-    stdin_open: true
+    stdin_open: true 
     tty: true
-  
