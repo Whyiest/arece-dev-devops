@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 # Définition du temps d'affichage des informations :
 SHOW_INFO_DELAY=5
 
@@ -40,7 +41,7 @@ gpu_detect() {
     
     if [ "$GPU_CHOICE" = "auto" ]; then
         # Auto-détection du GPU et attribution à la variable GPU
-        GPU= $(python ../Utilities/AutoDetect.py)
+        GPU=$($PYTHON ../Utilities/AutoDetect.py)
     elif [ "$GPU_CHOICE" = "manuel" ]; then
         # Saisie manuelle du GPU
         echo ""
@@ -66,7 +67,7 @@ create_docker_compose () {
     #   3 - Nom d'utilisateur à insérer 
     #   4 - Instruction volume à insérer
     #   5 - GPU Instructions à insérer
-    python ../Utilities/FileBuilder.py "../Utilities/template.yml" "./$DOCKER_COMPOSE_FILE" "$USERNAME" "$VOLUME_INSTRUCTIONS" "$GPU_INSTRUCTIONS" 
+    $PYTHON ../Utilities/FileBuilder.py "../Utilities/template.yml" "./$DOCKER_COMPOSE_FILE" "$USERNAME" "$VOLUME_INSTRUCTIONS" "$GPU_INSTRUCTIONS" 
     echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Utilisateur :${NC} $USERNAME"
     echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Instructions Volume :${NC} $VOLUME_INSTRUCTIONS"
     echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Instructions GPU :${NC} $GPU_INSTRUCTIONS"
@@ -99,16 +100,46 @@ file_check () {
 
 }
 
+gpu_create_instructions() {
+    case $GPU in
+        APPLE)
+            # À remplir avec des instructions spécifiques pour les GPU Apple
+            GPU_INSTRUCTIONS="Instruction_For_Apple_GPU"
+            ;;
+        NVIDIA)
+            # À remplir avec des instructions spécifiques pour les GPU Nvidia
+            GPU_INSTRUCTIONS="Instruction_For_Nvidia_GPU"
+            ;;
+        INTEL)
+            # À remplir avec des instructions spécifiques pour les GPU Intel
+            GPU_INSTRUCTIONS="Instruction_For_Intel_GPU"
+            ;;
+        AMD)
+            # À remplir avec des instructions spécifiques pour les GPU AMD
+            GPU_INSTRUCTIONS="Instruction_For_AMD_GPU"
+            ;;
+        UNKNOWN)
+            # Gestion du cas où le GPU n'est pas reconnu
+            handle_error "Erreur : Votre GPU n'est pas compatible. Si vous pensez que c'est un erreur, essayez d'indiquer manuellement votre GPU en relançant le script."
+            ;;
+        *)
+            # Gestion de tout autre cas imprévu
+            handle_error "Erreur : Type de GPU non reconnu."
+            ;;
+    esac
+}
 
 # Exportation 
 export RED GREEN YELLOW BLUE NC
 export GPU
 export USERNAME
 export LAUNCHER_PATH
+export PYTHON
 export -f handle_error
 export -f gpu_detect
 export -f create_docker_compose
 export -f file_check
+export -f gpu_create_instructions
 
 
 # Affichage de "ARECE" en art ASCII
@@ -160,6 +191,14 @@ elif [ "$OS_CHOICE" = "linux" ]; then
 else
     handle_error "Erreur : choix invalide, votre os n'est pas pris en charge."
 fi
+
+# Demande à l'utilisateur quel préfixe Python utiliser
+echo ""
+echo -ne "${NC}[${YELLOW}?${NC}] ${BLUE}Quel préfixe utilisez-vous sur votre ordinateur pour exécuter des scripts Python (${NC}python, py, python3${BLUE}) : ${NC}"
+read PYTHON_PREFIX
+PYTHON=$PYTHON_PREFIX
+echo ""
+echo -e "${NC}[${GREEN}✔${NC}] ${GREEN}Les scripts seront éxecuter avec $PYTHON. En cas de problème de création de fichier ou de détection de GPU, essayez de changer cette variable.${NC}"
 
 # Information utilisateur - DEBUT CONFIGURATION
 echo ""

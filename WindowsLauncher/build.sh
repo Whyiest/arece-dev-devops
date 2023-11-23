@@ -3,7 +3,7 @@
 # Définition des paths pour Windows (Change if needed)
 DOCKER_COMPOSE_FILE="docker-compose.yml"
 DOCKER_FILE="Dockerfile"
-HOST_VOLUME_PATH="/c/Users/$USERNAME/ros2_ws"
+HOST_VOLUME_PATH="c/Users/$USERNAME/ros2_ws"
 VOLUME_INSTRUCTIONS="$HOST_VOLUME_PATH:/home/arece/ros2_ws"
 
 
@@ -14,7 +14,8 @@ file_check
 gpu_detect
 
 # TO DO : Définir les instructions GPU en fonction du GPU détecté
-GPU_INSTRUCTIONS="null"
+gpu_create_instructions
+GPU_INSTRUCTIONS="null" # TEMPORAIRE : ANNULE LES EFFETS DE LA FONCTION PRECEDENTE
 
 
 # Création du fichier docker-compose.yml :
