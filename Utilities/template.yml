@@ -5,6 +5,7 @@ services:
     build: .
     environment:
       - DISPLAY=${DISPLAY}
+      ENVIRONMENT_PLACEHOLDER
     volumes:
       - VOLUME_PLACEHOLDER
     stdin_open: true 

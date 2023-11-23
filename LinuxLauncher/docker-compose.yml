@@ -5,7 +5,10 @@ services:
     build: .
     environment:
       - DISPLAY=${DISPLAY}
+      - LIBVA_DRIVER_NAME=iHD
     volumes:
       - /home/whyiest/ros2_ws:/home/arece/ros2_ws
     stdin_open: true 
     tty: true
+    devices:
+      - /dev/dri:/dev/dri

@@ -38,6 +38,7 @@ gpu_detect() {
     echo ""
     echo -ne "${NC}[${YELLOW}?${NC}] ${BLUE}Souhaitez-vous auto-détecter la carte graphique ou la saisir manuellement ? (${NC}auto/manuel${BLUE}) : ${NC}"
     read GPU_CHOICE
+    echo ""
     
     if [ "$GPU_CHOICE" = "auto" ]; then
         # Auto-détection du GPU et attribution à la variable GPU
@@ -67,10 +68,11 @@ create_docker_compose () {
     #   3 - Nom d'utilisateur à insérer 
     #   4 - Instruction volume à insérer
     #   5 - GPU Instructions à insérer
-    $PYTHON ../Utilities/FileBuilder.py "../Utilities/template.yml" "./$DOCKER_COMPOSE_FILE" "$USERNAME" "$VOLUME_INSTRUCTIONS" "$GPU_INSTRUCTIONS" 
+    $PYTHON ../Utilities/FileBuilder.py "../Utilities/template.yml" "./$DOCKER_COMPOSE_FILE" "$USERNAME" "$VOLUME_INSTRUCTIONS" "$DEVICE_INSTRUCTIONS" "$ENV_INSTRUCTIONS"
     echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Utilisateur :${NC} $USERNAME"
     echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Instructions Volume :${NC} $VOLUME_INSTRUCTIONS"
-    echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Instructions GPU :${NC} $GPU_INSTRUCTIONS"
+    echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Instructions Env GPU :${NC} $ENV_INSTRUCTIONS"
+    echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Instructions Device GPU :${NC} $DEVICE_INSTRUCTIONS"
     
     if [ $? -ne 0 ]; then
         handle_error "Erreur lors de la création du fichier docker-compose.yml."
@@ -103,30 +105,30 @@ file_check () {
 gpu_create_instructions() {
     case $GPU in
         APPLE)
-            GPU_INSTRUCTIONS="devices:\n      - /dev/dri:/dev/dri\n    environment:\n      - LIBVA_DRIVER_NAME=iHD"
+            DEVICE_INSTRUCTIONS="devices:\n      - /dev/dri:/dev/dri"
+            ENV_INSTRUCTIONS="- LIBVA_DRIVER_NAME=iHD"
             ;;
         NVIDIA)
-            # Instructions pour les GPU NVIDIA
-            GPU_INSTRUCTIONS="deploy:\n      resources:\n        reservations:\n          devices:\n            - driver: nvidia\n              capabilities: [gpu]"
+            DEVICE_INSTRUCTIONS="deploy:\n      resources:\n        reservations:\n          devices:\n            - driver: nvidia\n              capabilities: [gpu]"
+            ENV_INSTRUCTIONS=""
             ;;
         INTEL)
-            # Instructions pour les GPU Intel
-            GPU_INSTRUCTIONS="devices:\n      - /dev/dri:/dev/dri\n    environment:\n      - LIBVA_DRIVER_NAME=iHD"
+            DEVICE_INSTRUCTIONS="devices:\n      - /dev/dri:/dev/dri"
+            ENV_INSTRUCTIONS="- LIBVA_DRIVER_NAME=iHD"
             ;;
         AMD)
-            # Instructions pour les GPU AMD
-            GPU_INSTRUCTIONS="devices:\n      - /dev/dri:/dev/dri\n    environment:\n      - LIBVA_DRIVER_NAME=radeonsi"
+            DEVICE_INSTRUCTIONS="devices:\n      - /dev/dri:/dev/dri"
+            ENV_INSTRUCTIONS="- LIBVA_DRIVER_NAME=radeonsi"
             ;;
         UNKNOWN)
-            # Gestion du cas où le GPU n'est pas reconnu
             handle_error "Erreur : Votre GPU n'est pas compatible. Si vous pensez que c'est une erreur, essayez d'indiquer manuellement votre GPU en relançant le script."
             ;;
         *)
-            # Gestion de tout autre cas imprévu
             handle_error "Erreur : Type de GPU non reconnu."
             ;;
     esac
 }
+
 
 
 # Exportation 

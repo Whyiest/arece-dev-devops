@@ -15,7 +15,7 @@ gpu_detect
 
 # TO DO : Définir les instructions GPU en fonction du GPU détecté
 gpu_create_instructions
-GPU_INSTRUCTIONS="null" # TEMPORAIRE : ANNULE LES EFFETS DE LA FONCTION PRECEDENTE
+#GPU_INSTRUCTIONS="null" # TEMPORAIRE : ANNULE LES EFFETS DE LA FONCTION PRECEDENTE
 
 
 # Création du fichier docker-compose.yml :
