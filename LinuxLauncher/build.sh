@@ -15,14 +15,3 @@ if [ "$ELEVATION_CHOICE" = "y" ]; then
 fi
 echo ""
 
-# Vérification de l'existence des fichiers
-file_check
-
-# Détecter la présence d'une carte graphique NVIDIA, INTEL ou AMD
-gpu_detect
-
-# TO DO : Définir les instructions GPU en fonction du GPU détecté
-gpu_create_instructions
-
-# Création du fichier docker-compose.yml :
-create_docker_compose

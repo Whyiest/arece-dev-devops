@@ -1,0 +1,14 @@
+version: "3"
+services:
+  humble-master:
+    image: humble:latest
+    build: .
+    environment:
+      - DISPLAY=${DISPLAY}
+      - LIBVA_DRIVER_NAME=iHD
+    volumes:
+      - /c/Users/esteb/ros2_ws:/home/arece/ros2_ws
+    stdin_open: true 
+    tty: true
+    devices:
+      - /dev/dri:/dev/dri

@@ -1,6 +1,13 @@
 #!/bin/bash
 export MSYS_NO_PATHCONV=1
 
+# Mode debug - UNCOMMENT IF NEEDED
+# Permet de stopper le script sur la première erreur
+# set -e 
+# trap 'echo -e "${RED}DEBUG : Erreur détectée. Appuyez sur une touche pour quitter.${NC}"; read -r' EXIT
+
+# ----------------------------- VARIABLES ----------------------------#
+
 # Définition du temps d'affichage des informations :
 SHOW_INFO_DELAY=5
 
@@ -14,7 +21,7 @@ USERNAME=$(whoami)
 GPU="UNKNOWN"
 
 # Default Path
-MAC_FOLDER='MacLauncher'
+MAC_FOLDER='MacLauncher' # IMPORTANT : Non supporté
 WINDOWS_FOLDER='WindowsLauncher'
 LINUX_FOLDER='LinuxLauncher'
 LAUNCHER_PATH=""
@@ -26,6 +33,8 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # Pas de couleur
 
+# ----------------------------- FONCTIONS ----------------------------#
+
 # Fonction de gestion des erreurs
 handle_error() {
     echo -e "${NC}[${RED}⨯${NC}] ${RED}$1"
@@ -34,33 +43,19 @@ handle_error() {
     exit 1
 }
 
-gpu_detect() {
-    echo ""
-    echo -ne "${NC}[${YELLOW}?${NC}] ${BLUE}Souhaitez-vous auto-détecter la carte graphique ou la saisir manuellement ? (${NC}auto/manuel${BLUE}) : ${NC}"
-    read GPU_CHOICE
-    echo ""
-    
-    if [ "$GPU_CHOICE" = "auto" ]; then
-        # Auto-détection du GPU et attribution à la variable GPU
-        GPU=$($PYTHON ../Utilities/AutoDetect.py)
-    elif [ "$GPU_CHOICE" = "manuel" ]; then
-        # Saisie manuelle du GPU
-        echo ""
-        echo -ne "${NC}[${YELLOW}?${NC}] ${BLUE}Veuillez saisir le type de votre GPU (${NC}NVIDIA/AMD/INTEL${BLUE}) : ${NC}"
-        read GPU_MANUAL
-        GPU=$(echo "$GPU_MANUAL" | tr '[:lower:]' '[:upper:]') # Convertit en majuscules
-    else
-        handle_error "Erreur : choix invalide. Veuillez choisir 'auto' ou 'manuel'."
-    fi
+# Cette fonction permet de détecter automatiquement quel GPU est présent sur le système
+gpu_detect() {    
+    # Auto-détection du GPU et attribution à la variable GPU
+    GPU=$($PYTHON ./Utilities/AutoDetect.py)
+   
     
     # Vérification que l'entrée est l'une des options valides (NVIDIA, AMD, INTEL)
     if [ "$GPU" != "NVIDIA" ] && [ "$GPU" != "AMD" ] && [ "$GPU" != "INTEL" ] && [ "$GPU" != "APPLE" ]; then
-        handle_error "Erreur : choix invalide. Veuillez choisir 'NVIDIA', 'AMD' ou 'INTEL' ou 'APPLE'."
+        handle_error "Erreur : GPU non reconnu. Veuillez utiliser un GPU 'NVIDIA', 'AMD' ou 'INTEL' ou 'APPLE'."
     fi
-
-    echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}GPU détecté/saisi: ${NC}${GPU}"
 }
 
+# Cette fonction permet de créer le Docker Compose en fonction de l'OS et du GPU.
 create_docker_compose () {
     #   0 - Fichier python depuis build.sh
     #   1 - Fichier template depuis build.sh
@@ -68,24 +63,24 @@ create_docker_compose () {
     #   3 - Nom d'utilisateur à insérer 
     #   4 - Instruction volume à insérer
     #   5 - GPU Instructions à insérer
-    $PYTHON ../Utilities/FileBuilder.py "../Utilities/template.yml" "./$DOCKER_COMPOSE_FILE" "$USERNAME" "$VOLUME_INSTRUCTIONS" "$DEVICE_INSTRUCTIONS" "$ENV_INSTRUCTIONS"
-    echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Utilisateur :${NC} $USERNAME"
-    echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Instructions Volume :${NC} $VOLUME_INSTRUCTIONS"
-    echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Instructions Env GPU :${NC} $ENV_INSTRUCTIONS"
-    echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Instructions Device GPU :${NC} $DEVICE_INSTRUCTIONS"
+    
+    $PYTHON ./Utilities/FileBuilder.py "./Utilities/template.yml" "./$LAUNCHER_PATH/$DOCKER_COMPOSE_FILE" "$USERNAME" "$VOLUME_INSTRUCTIONS" "$DEVICE_INSTRUCTIONS" "$ENV_INSTRUCTIONS"
+    
     
     if [ $? -ne 0 ]; then
         handle_error "Erreur lors de la création du fichier docker-compose.yml."
     fi
 }
  
+# Vérifie que tous les fichiers soient bien présents
 file_check () {
+    
+    cd "./$LAUNCHER_PATH"
     
     # Vérification de l'existence du fichier docker-compose.yml
     if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
       handle_error "Erreur : le fichier $DOCKER_COMPOSE_FILE n'existe pas."
     fi  
-
     echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Docker Compose path :${NC} $DOCKER_COMPOSE_FILE"
 
     # Vérification de l'existence du fichier Dockerfile
@@ -99,9 +94,12 @@ file_check () {
         handle_error "Erreur : le dossier $HOST_VOLUME_PATH doit être créé sur l'host pour poursuivre."
     fi
     echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Host volume path :${NC} $HOST_VOLUME_PATH"
+    
+    cd "../"
 
 }
 
+# Permet de définir les instructions GPU
 gpu_create_instructions() {
     case $GPU in
         APPLE)
@@ -130,6 +128,100 @@ gpu_create_instructions() {
 }
 
 
+# Auto-détection du système d'exploitation
+os_detect() {
+    
+    # Récupératio de la version système
+    UNAME_OUT="$(uname -s)"
+    
+    # Selon le préfixe, determination de l'OS
+    case "${UNAME_OUT}" in
+        Linux*)     OS='Linux';;
+        Darwin*)    OS='Mac';;
+        CYGWIN*|MINGW*|MSYS*|MINGW*) OS='Windows';;
+        *)          handle_error "Système d'exploitation non pris en charge.";;
+    esac
+}
+
+# Détermine le path où se trouvent les fichiers
+os_path() {
+    
+    # Détermination du path des fichiers
+    case "$OS" in
+        Mac) LAUNCHER_PATH='MacLauncher' ;;
+        Linux) LAUNCHER_PATH='LinuxLauncher' ;;
+        Windows) LAUNCHER_PATH='WindowsLauncher' ;;
+        *) handle_error "Système d'exploitation non pris en charge.";;
+    esac
+}
+
+# Permet d'éxecuter des lignes supplémenatires selon l'OS
+os_build() {
+    
+    cd "./$LAUNCHER_PATH"
+    
+    # Vérification fichier
+    if [ ! -f "build.sh" ]; then
+      handle_error "Erreur : impossible de trouver le fichier de vérification de l'OS (./$LAUNCHER_PATH/build.sh)."
+    fi
+    
+    # Exécution des commandes spécifiques    
+    source build.sh
+    
+    # Vérification erreurs
+    BUILD_EXIT_CODE=$? 
+    if [ $BUILD_EXIT_CODE -ne 0 ]; then
+        handle_error "Un problème est survenu lors de l'éxecution du fichier build.sh"
+    fi
+    
+    cd "../"
+}
+
+
+# Permet de détecter quel préfixe python est utilisé selon l'OS.
+python_detect() {
+    
+    # Détection du préfixe Python
+    if [ "$OS" = "Windows" ]; then
+        # Utilise where (Windows) pour la détection
+        if where python > /dev/null 2>&1; then
+            PYTHON="python"
+        elif where python3 > /dev/null 2>&1; then
+            PYTHON="python3"
+        else
+            handle_error "Python n'est pas installé ou n'est pas accessible dans le PATH. L'installation ne peut pas continuer."
+            exit 1
+        fi
+    else
+        # Utilise which (Unix/Linux) pour la détection
+        if which python > /dev/null 2>&1; then
+            PYTHON="python"
+        elif which python3 > /dev/null 2>&1; then
+            PYTHON="python3"
+        else
+            handle_error "Python n'est pas installé ou n'est pas accessible dans le PATH."
+            exit 1
+        fi
+    fi
+}
+
+# Demande le consentemment de l'utilisateur pour lancer l'installation : 
+installation_consent() {
+    echo -ne "${NC}[${YELLOW}?${NC}] ${BLUE}Voulez-vous lancer l'installation de l'environnement ARECE ? (${NC}y/n${BLUE}) : ${NC}"
+    read INSTALL_CHOICE
+
+    if [ "$INSTALL_CHOICE" = "y" ]; then
+        echo ""
+    elif [ "$INSTALL_CHOICE" = "n" ]; then
+        handle_error "Annulation de l'installation."
+    else
+        handle_error "Choix non reconnu, annulation."
+    fi
+}
+
+
+# ----------------------------- EXPORT ----------------------------#
+
 
 # Exportation 
 export RED GREEN YELLOW BLUE NC
@@ -138,10 +230,10 @@ export USERNAME
 export LAUNCHER_PATH
 export PYTHON
 export -f handle_error
-export -f gpu_detect
-export -f create_docker_compose
-export -f file_check
-export -f gpu_create_instructions
+
+
+
+# ----------------------------- DETECTION ----------------------------#
 
 
 # Affichage de "ARECE" en art ASCII
@@ -156,85 +248,83 @@ echo -e "${NC}"
 echo ""
 
 
-
 # Information programme
-echo -e "${GREEN}Si vous avez déjà lancé et créé une instance Docker avec cet outil, supprimez-la avec docker kill [instance] et effacez les fichiers liés."
+echo -e "${GREEN}${NC}[${BLUE}🛈${NC}] ${GREEN}Si vous avez déjà lancé et créé une instance Docker avec cet outil, supprimez-la avec docker kill [instance] et effacez les fichiers liés."
 echo ""
-echo -e "${NC}[${BLUE}🛈${NC}] ${BLUE}Utilisateur actuel : ${NC}$USERNAME"
 echo -e "${NC}[${BLUE}🛈${NC}] ${BLUE}Dépendences : ${NC}python, docker-compose"
 
 # Demande à l'utilisateur de son consentemment d'installation
 echo ""
-echo -ne "${NC}[${YELLOW}?${NC}] ${BLUE}Voulez-vous lancer l'installation de l'environnement ARECE ? (${NC}y/n${BLUE}) : ${NC}"
-read INSTALL_CHOICE
+installation_consent
 
-if [ "$INSTALL_CHOICE" = "y" ]; then
-    echo ""
-elif [ "$INSTALL_CHOICE" = "n" ]; then
-    handle_error "Annulation de l'installation."
 
-else
-    handle_error "Choix non reconnu, annulation."
-fi
-
-# Demande à l'utilisateur de choisir entre Mac et Windows
-echo -ne "${NC}[${YELLOW}?${NC}] ${BLUE}Choisissez votre système d'exploitation (${NC}mac/windows/linux${BLUE}) : ${NC}"
-read OS_CHOICE
-
-if [ "$OS_CHOICE" = "mac" ]; then
-    # ARM ONLY
-    LAUNCHER_PATH="$MAC_FOLDER"
-elif [ "$OS_CHOICE" = "windows" ]; then
-    # x86 ONLY
-    LAUNCHER_PATH="$WINDOWS_FOLDER"
-elif [ "$OS_CHOICE" = "linux" ]; then
-    # x86 ONLY
-    LAUNCHER_PATH="$LINUX_FOLDER"
-else
-    handle_error "Erreur : choix invalide, votre os n'est pas pris en charge."
-fi
-
-# Demande à l'utilisateur quel préfixe Python utiliser
+# Lancement des détections automatiques : 
 echo ""
-echo -ne "${NC}[${YELLOW}?${NC}] ${BLUE}Quel préfixe utilisez-vous sur votre ordinateur pour exécuter des scripts Python (${NC}python, py, python3${BLUE}) : ${NC}"
-read PYTHON_PREFIX
-PYTHON=$PYTHON_PREFIX
+echo -e "${NC}[${GREEN}⧁${NC}] ${GREEN}[1] - Détections"
 echo ""
-echo -e "${NC}[${GREEN}✔${NC}] ${GREEN}Les scripts seront éxecutés avec $PYTHON. En cas de problème de création de fichier ou de détection de GPU, essayez de changer cette variable.${NC}"
 
-# Information utilisateur - DEBUT CONFIGURATION
-echo ""
-echo -e "${NC}[${GREEN}⧁${NC}] ${GREEN}Démarrage vérification..."
-echo ""
-cd "./$LAUNCHER_PATH"
+echo -e "${NC}[${BLUE}✔${NC}] ${BLUE}Installation pour : ${NC}$USERNAME"
 
-# Vérification intégrité fichier build
-if [ ! -f "build.sh" ]; then
-    handle_error "Erreur : impossible de trouver le fichier de vérification de l'OS (./$LAUNCHER_PATH/build.sh)."
-fi
+os_detect
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}OS detecté : ${NC}$OS.${NC}"
 
-./build.sh
-BUILD_EXIT_CODE=$?  
-if [ $BUILD_EXIT_CODE -ne 0 ]; then
-    exit 1  # Arrête AreceEnv.sh si build.sh a échoué
-fi
+os_path
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Dossier d'installation : ${NC}$LAUNCHER_PATH.${NC}"
 
-# Information utilisateur - FIN CONFIGURATION 
+python_detect
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Les scripts seront éxecutés avec ${NC}$PYTHON.${NC}"
+
+gpu_detect
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}GPU detecté :  ${NC}$GPU.${NC}"
+
+
+# ----------------------------- PREPARATION ----------------------------#
+
+
+# Information utilisateur 
 echo ""
-echo -e "${NC}[${GREEN}✔${NC}] ${GREEN}Vérification terminée."
+echo -e "${NC}[${GREEN}⧁${NC}] ${GREEN}[2] - Préparation"
 echo ""
-echo -e "${NC}[${GREEN}✔${NC}] ${GREEN}Prêt au lancement, début dans ${NC}$SHOW_INFO_DELAY second(s)."
+
+# Lancement fichier build selon l'OS
+os_build
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Fichier chargé :${NC} $LAUNCHER_PATH/build.sh"
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Instructions Volume :${NC} $VOLUME_INSTRUCTIONS"
+
+# Vérification de l'existence des fichiers
+file_check
+
+#  Définir les instructions GPU en fonction du GPU détecté
+gpu_create_instructions
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Instructions Device GPU :${NC} $DEVICE_INSTRUCTIONS"
+echo -e "${NC}[${GREEN}✔${NC}] ${BLUE}Instructions Env GPU :${NC} $ENV_INSTRUCTIONS"
+
+# Création du fichier docker-compose.yml :
+create_docker_compose
+
+
+
+# ----------------------------- BUILD  ----------------------------#
+
+
+# Information utilisateur 
+echo ""
+echo -e "${NC}[${GREEN}⧁${NC}] ${GREEN}[3] - Build"
+echo ""
+echo -e "${NC}[${GREEN}✔${NC}] ${GREEN}Merci de vérifier les informations au-dessus, début dans ${NC}$SHOW_INFO_DELAY second(s)."
 echo ""
 sleep $SHOW_INFO_DELAY
 
-# Lancement du container avec docker-compose
+# Build du container avec docker-compose
+cd "./$LAUNCHER_PATH"
 echo -e "${NC}[${BLUE}⧁${NC}] ${BLUE}Construction du container Docker... ${NC}"
-docker-compose build || handle_error "Erreur lors de la construction du container Docker. Si vous utilisez Docker Desktop, assurez-vous qu'il soit lancé."
+docker-compose build || handle_error "Erreur lors de la construction du container Docker. Note : si vous utilisez Docker Desktop, assurez-vous qu'il soit lancé."
 
 # Lancement du container avec docker-compose
 echo ""
 echo -e "${NC}[${BLUE}⧁${NC}] ${BLUE}Lancement du container Docker... ${NC}"
-docker-compose up -d || handle_error "Erreur lors du lancement du container Docker. Si vous utilisez Docker Desktop, assurez-vous qu'il soit lancé. "
+docker-compose up -d || handle_error "Erreur lors du lancement du container Docker. Note : si vous utilisez Docker Desktop, assurez-vous qu'il soit lancé. "
+cd "../"
 
 # Fin programme
 echo ""
